@@ -46,14 +46,19 @@ Example: `POST /api/0.1.0/devices`
 |**500**|Internal Server Error|[SimpleError](#simpleerror)|
 
 
-#### Consumes
+#### Example HTTP request
 
-* `application/json`
-
-
-#### Produces
-
-* `application/json`
+##### Request body
+```
+json :
+{
+  "application/json" : {
+    "id" : "00a0c91e6-7dec-11d0-a765-f81d4faebf1",
+    "device_identity" : "{\"SN\":\"131313131\", \"cpuid\":\"12331-ABC\", \"mac\":\"00:11:22:33:44:55\"}",
+    "key" : "5f36d271484c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a21"
+  }
+}
+```
 
 
 #### Example HTTP response
@@ -62,9 +67,10 @@ Example: `POST /api/0.1.0/devices`
 ```
 json :
 {
-  "error" : "Detailed error message"
+  "application/json" : {
+    "error" : "Detailed error message"
+  }
 }
-```
 
 ___
 <a name="devices-get"></a>
@@ -93,18 +99,45 @@ Example: `GET /api/0.1.0/devices?page=1&per_page=20&status=accepted`
 |**500**|Internal Server Error|[SimpleError](#simpleerror)|
 
 
-#### Produces
-
-* `application/json`
-
 
 #### Example HTTP response
+
+##### Response 200
+```
+json :
+{
+  "application/json" : [ {
+    "id" : "db1a77019-af2e-103d-baac-8d1e740da98",
+    "device_identity" : "{\"SN\":\"131313131\", \"cpuid\":\"12331-ABC\", \"mac\":\"00:11:22:33:44:55\"}",
+    "key" : "5f36d271484c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a21",
+    "status" : "accepted",
+    "attributes" : {
+      "SN" : "131313131",
+      "cpuid" : "12331-ABC",
+      "mac" : "00:11:22:33:44:56"
+    }
+  }, {
+    "id" : "00a0c91e6-7dec-11d0-a765-f81d4faebf1",
+    "device_identity" : "{\"SN\":\"131313131\", \"cpuid\":\"12331-ABC\", \"mac\":\"00:11:22:33:44:55\"}",
+    "key" : "5f36d271484c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a21",
+    "status" : "accepted",
+    "attributes" : {
+      "SN" : "131313131",
+      "cpuid" : "12331-ABC",
+      "mac" : "00:11:22:33:44:56"
+    }
+  } ]
+}
+```
+
 
 ##### Response 500
 ```
 json :
 {
-  "error" : "Detailed error message"
+  "application/json" : {
+    "error" : "Detailed error message"
+  }
 }
 ```
 
@@ -132,10 +165,6 @@ Example: `GET /api/0.1.0/devices/00a0c91e6-7dec-11d0-a765-f81d4faebf1`
 |**500**|Internal Server Error|[SimpleError](#simpleerror)|
 
 
-#### Produces
-
-* `application/json`
-
 
 #### Example HTTP response
 
@@ -143,7 +172,9 @@ Example: `GET /api/0.1.0/devices/00a0c91e6-7dec-11d0-a765-f81d4faebf1`
 ```
 json :
 {
-  "error" : "Detailed error message"
+  "application/json" : {
+    "error" : "Detailed error message"
+  }
 }
 ```
 
@@ -152,7 +183,9 @@ json :
 ```
 json :
 {
-  "error" : "Detailed error message"
+  "application/json" : {
+    "error" : "Detailed error message"
+  }
 }
 ```
 
@@ -185,7 +218,9 @@ Example: `GET /devices/3d98um-nxxdd3-3te223g-23r4/status`
 ```
 json :
 {
-  "status" : "pending"
+  "application/json" : {
+    "status" : "accepted"
+  }
 }
 ```
 
@@ -194,7 +229,9 @@ json :
 ```
 json :
 {
-  "error" : "Detailed error message"
+  "application/json" : {
+    "error" : "Detailed error message"
+  }
 }
 ```
 
@@ -203,7 +240,9 @@ json :
 ```
 json :
 {
-  "error" : "Detailed error message"
+  "application/json" : {
+    "error" : "Detailed error message"
+  }
 }
 ```
 
@@ -233,15 +272,6 @@ Example: `PUT devices/00a0c91e6-7dec-11d0-a765-f81d4faebf1/status`
 |**500**|Internal Server Error|[SimpleError](#simpleerror)|
 
 
-#### Consumes
-
-* `application/json`
-
-
-#### Produces
-
-* `application/json`
-
 
 #### Example HTTP request
 
@@ -249,7 +279,9 @@ Example: `PUT devices/00a0c91e6-7dec-11d0-a765-f81d4faebf1/status`
 ```
 json :
 {
-  "status" : "pending"
+  "application/json" : {
+    "status" : "accepted"
+  }
 }
 ```
 
@@ -260,7 +292,9 @@ json :
 ```
 json :
 {
-  "error" : "Detailed error message"
+  "application/json" : {
+    "error" : "Detailed error message"
+  }
 }
 ```
 
@@ -269,7 +303,9 @@ json :
 ```
 json :
 {
-  "error" : "Detailed error message"
+  "application/json" : {
+    "error" : "Detailed error message"
+  }
 }
 ```
 
