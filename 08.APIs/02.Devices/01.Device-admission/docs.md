@@ -71,6 +71,7 @@ json :
     "error" : "Detailed error message"
   }
 }
+```
 
 ___
 <a name="devices-get"></a>
