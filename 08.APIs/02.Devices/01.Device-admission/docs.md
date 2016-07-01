@@ -6,11 +6,15 @@ taxonomy:
 
 <a name="overview"></a>
 ## Overview
-*Version* : 0.1.0
-
-*BasePath* : /api/0.1.0
 
 Device admission service. More info text about device admission.
+
+
+### Version information
+*Version* : 0.1.0
+
+### URI scheme
+*BasePath* : /api/0.1.0
 
 <a name="paths"></a>
 ### Paths
