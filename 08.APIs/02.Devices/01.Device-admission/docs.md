@@ -71,7 +71,7 @@ json :
     "error" : "Detailed error message"
   }
 }
-```
+``
 
 ___
 <a name="devices-get"></a>
@@ -120,7 +120,7 @@ json :
   }, {
     "id" : "00a0c91e6-7dec-11d0-a765-f81d4faebf1",
     "device_identity" : "{\"SN\":\"131313131\", \"cpuid\":\"12331-ABC\", \"mac\":\"00:11:22:33:44:55\"}",
-    "key" : "5f36d271484c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a21",
+    "key" : "0f470672a58374863a28943c0fdbfe036ff1b63665c3fdfa7c252eb9aa1ca29f",
     "status" : "accepted",
     "attributes" : {
       "SN" : "131313131",
