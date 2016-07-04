@@ -7,7 +7,7 @@ taxonomy:
 <a name="overview"></a>
 ## Overview
 
-Device admission service. More info text about device admission.
+The device admission service allows devices to be granted or denied access based on their identity.
 
 
 ### Version information
@@ -15,6 +15,7 @@ Device admission service. More info text about device admission.
 
 ### URI scheme
 *BasePath* : /api/0.1.0
+
 
 <a name="paths"></a>
 ### Paths
@@ -75,7 +76,7 @@ json :
     "error" : "Detailed error message"
   }
 }
-``
+```
 
 ___
 <a name="devices-get"></a>

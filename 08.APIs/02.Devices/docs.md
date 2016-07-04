@@ -1,16 +1,13 @@
 ---
-title: Devices API
+title: Devices
 taxonomy:
     category: docs
 ---
 
-Broken down into 3 services: admission, identity, device management
+Broken down into 3 services:
 
-#### [Device admission](Admissions)
-Device admission service
+* [Device admission](Device-admission): Device admission service
 
-#### [Device identity](Athentication)
-API for device identity management and device auth request handling.
+* [Device identity](Device-identity): API for device identity management and device auth request handling
 
-#### [Device management](Device-managment)
-Add/remove devices to groups, create/delete groups
+* [Device management](Device-management): Add/remove devices to groups, create/delete groups
