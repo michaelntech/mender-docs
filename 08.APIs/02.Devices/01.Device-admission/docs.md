@@ -2,6 +2,7 @@
 title: Device admission service
 taxonomy:
     category: docs
+api: true
 ---
 
 <a name="overview"></a>
