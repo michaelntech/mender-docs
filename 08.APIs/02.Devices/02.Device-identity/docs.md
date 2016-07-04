@@ -47,3 +47,369 @@ of this service:
 
 
 ___
+
+
+<a name="auth_requests-post"></a>
+### POST /auth_requests
+
+The device passes its vendor-defined identification data and tenant token
+to obtain a valid JSON Web Token to be used in subsequent Mender API communications.
+The id data is encrypted using the tenant's public key.
+
+The Identity Service consults the id data with the Device Admission Service,
+and either accepts the request, issuing a JWT (if the identity has been
+accepted by the user), or rejects it as unauthorized.
+
+This method simultaneously acts as a bootstraping one - upon the first
+auth request, the device is enrolled in the system, and we start
+tracking its state via generated Device ID.
+
+The returned JWT is
+  * signed with the identity service's private key
+  * encrypted with the device's public key
+
+JWTs are issued with the following standard fields:
+  * 'exp' - expiry date
+  * 'sub' - subject (Mender-generated device ID)
+  * 'jit' - token's unique identifier
+
+Each request is signed with the device's private key. The 'X-MEN-Signature' custom header carries the signature computed as:
+
+   BASE64(SIGN(privkey, SHA256(body)))
+
+An increasing 'seq_no' is used to prevent replay attacks. Upon the very first request
+the client can provide any non-zero uint64, which will be recorded by the server for subsequent requests.
+
+Example: `POST /v0.1/auth_requests`
+
+#### Parameters
+
+|Type|Name|Description|Schema|Default|
+|---|---|---|---|---|
+|**Header**|**X-MEN-Signature**  <br>*optional*|Base64 version of body signed with device's private key.|string| |
+|**Body**|**auth_request**  <br>*required*|Auth request|[AuthRequestNew](#authrequestnew)| |
+
+
+#### Responses
+
+|HTTP Code|Description|Schema|
+|---|---|---|
+|**200**|Authentication successful - a new JWT is issued and returned (encrypted with device's public key).|number(binary)|
+|**400**|Missing/malformed request params or body.|[Error](#error)|
+|**401**|The device cannot be granted authentication (e.g. not accepted by the user yet, or explicitly rejected).|No Content|
+|**500**|Unexpected error|[Error](#error)|
+
+___
+
+<a name="auth_requests-get"></a>
+### GET /auth_requests
+
+A history of device-submitted auth requests. Provides a list of timestamped auth requests submitted by a device.
+Gives the tenant a historical perspective of a device's interaction with the auth service.
+If no device_id is provided, returns info on all tenant's devices, sorted by timestamp.
+
+Example: `GET /v0.1/auth_requests?device_id=00a0c91e6-7dec-11d0-a765-f81d4faebf1&page=1&per_page=10`
+
+
+#### Parameters
+
+|Type|Name|Description|Schema|Default|
+|---|---|---|---|---|
+|**Query**|**device_id**  <br>*optional*|Mender-assigned device ID|string| |
+|**Query**|**page**  <br>*optional*|Result page number|number(integer)|`"0"`|
+|**Query**|**per_page**  <br>*optional*|Number of results per page|number(integer)|`"20"`|
+
+
+#### Responses
+
+|HTTP Code|Description|Schema|
+|---|---|---|
+|**200**|An array of authentication requests  <br>**Headers** :   <br>`Link` (string) : Standard header, we support 'first', 'next', and 'prev'.|< [AuthRequest](#authrequest) > array|
+|**400**|Missing/malformed request params.|[Error](#error)|
+|**404**|Device or tenant not found|[Error](#error)|
+|**500**|Unexpected error|[Error](#error)|
+
+___
+
+<a name="devices-get"></a>
+### GET /devices
+
+Get a list of tenant's devices. Provides a list of tenant's devices, with optional device status filter.
+
+Example: `GET /v0.1/devices?page=1&per_page=10&status=accepted&tenant_token=somestringiguess`
+
+#### Parameters
+
+|Type|Name|Description|Schema|Default|
+|---|---|---|---|---|
+|**Query**|**page**  <br>*optional*|Results page number|number(integer)|`"0"`|
+|**Query**|**per_page**  <br>*optional*|Number of results per page|number(integer)|`"20"`|
+|**Query**|**status**  <br>*optional*|Device status filter|enum (pending, accepted, rejected)| |
+|**Query**|**tenant_token**  <br>*required*|A token uniquely identifying the tenant|string| |
+
+
+#### Responses
+
+|HTTP Code|Description|Schema|
+|---|---|---|
+|**200**|An array of devices.  <br>**Headers** :   <br>`Link` (string) : Standard header, we support 'first', 'next', and 'prev'.|< [Device](#device) > array|
+|**400**|Missing/malformed request params.|[Error](#error)|
+|**404**|Tenant not found.|[Error](#error)|
+|**500**|Unexpected error|[Error](#error)|
+
+___
+
+<a name="devices-id-get"></a>
+### GET /devices/{id}
+
+Get a particular device.
+
+Example: `GET /v0.1/devices/00a0c91e6-7dec-11d0-a765-f81d4faebf1`
+
+#### Parameters
+
+|Type|Name|Description|Schema|Default|
+|---|---|---|---|---|
+|**Path**|**id**  <br>*required*|Device identifier|string| |
+
+
+#### Responses
+
+|HTTP Code|Description|Schema|
+|---|---|---|
+|**200**|Device found.|[Device](#device)|
+|**404**|Device not found.|[Error](#error)|
+|**500**|Unexpected error|[Error](#error)|
+
+___
+
+<a name="devices-id-put"></a>
+### PUT /devices/{id}
+
+Update a device's state. Allows changing the device's status. Valid state transitions:
+- pending -> accepted
+- pending -> rejected
+- rejected -> accepted
+
+Example: `PUT /v0.1/devices/00a0c91e6-7dec-11d0-a765-f81d4faebf1`
+
+#### Parameters
+
+|Type|Name|Description|Schema|Default|
+|---|---|---|---|---|
+|**Path**|**id**  <br>*required*|Device identifier|string| |
+|**Body**|**device**  <br>*required*|Device representation|[Device](#device)| |
+
+
+#### Responses
+
+|HTTP Code|Description|Schema|
+|---|---|---|
+|**200**|Device successfully updated.|No Content|
+|**400**|Missing/malformed request params or body.|No Content|
+|**404**|Device not found.|[Error](#error)|
+|**422**|Invalid update operation (e.g. state transition)|No Content|
+|**500**|Unexpected error|[Error](#error)|
+
+___
+
+<a name="devices-id-status-put"></a>
+### PUT /devices/{id}/status
+
+Update device admission state
+
+Example: `PUT /v0.1/devices/00a0c91e6-7dec-11d0-a765-f81d4faebf1`
+
+#### Parameters
+
+|Type|Name|Description|Schema|Default|
+|---|---|---|---|---|
+|**Path**|**id**  <br>*required*|Device identifier|string| |
+|**Body**|**status**  <br>*required*|New status|[Status](#status)| |
+
+
+#### Responses
+
+|HTTP Code|Description|Schema|
+|---|---|---|
+|**303**|Device updated  <br>**Headers** :   <br>`Location` (string) : URI of updated device.|No Content|
+|**404**|Not Found|[Error](#error)|
+|**500**|Internal Server Error|[Error](#error)|
+
+
+#### Example HTTP response
+
+##### Response 404
+```
+json :
+{
+  "application/json" : {
+    "error" : "Detailed error message"
+  }
+}
+```
+
+
+##### Response 500
+```
+json :
+{
+  "application/json" : {
+    "error" : "Detailed error message"
+  }
+}
+```
+
+___
+
+<a name="devices-id-token-get"></a>
+### GET /devices/{id}/token
+
+Retrieve a device's active JWT token. Provides a descriptor of the device's current JWT token.
+
+Example: `GET /v0.1/devices/00a0c91e6-7dec-11d0-a765-f81d4faebf1/token`
+
+#### Parameters
+
+|Type|Name|Description|Schema|Default|
+|---|---|---|---|---|
+|**Path**|**id**  <br>*required*|Mender-issued device identifier.|string| |
+
+
+#### Responses
+
+|HTTP Code|Description|Schema|
+|---|---|---|
+|**200**|Device successfully updated.|No Content|
+|**404**|No JWT token found.|[Error](#error)|
+|**500**|Unexpected error|[Error](#error)|
+
+___
+
+<a name="tokens-verify-post"></a>
+### POST /tokens/verify
+
+Check the validity of a token. Other services (most notably the API gateway) should delegate token verification
+to the identity service via this endpoint.
+
+Besides the basic validity check, the service will take into account token
+expiration time and user-requested revocation.
+
+Example: `POST /v0.1/tokens/verify`
+
+#### Parameters
+
+|Type|Name|Description|Schema|Default|
+|---|---|---|---|---|
+|**Body**|**token**  <br>*required*|The token base64 encoded form.|string| |
+
+
+#### Responses
+
+|HTTP Code|Description|Schema|
+|---|---|---|
+|**200**|Token is valid.|No Content|
+|**400**|Missing/malformed request params.|No Content|
+|**401**|Verification failed - token should be rejected.|No Content|
+|**403**|Token has expired - reapply for a new one.|No Content|
+|**500**|Unexpected error|[Error](#error)|
+
+___
+
+<a name="tokens-id-put"></a>
+### PUT /tokens/{id}
+
+Change the token's state (e.g. revoke)
+
+Example: `PUT /v0.1/tokens/dc5e030bb72e0cd1103379306aa59ea5`
+
+#### Parameters
+
+|Type|Name|Description|Schema|Default|
+|---|---|---|---|---|
+|**Path**|**id**  <br>*required*|Unique token identifier.|string| |
+|**Body**|**token**  <br>*required*|Token descriptor.|[TokenDescriptor](#tokendescriptor)| |
+
+
+#### Responses
+
+|HTTP Code|Description|Schema|
+|---|---|---|
+|**200**|Token successfully updated.|No Content|
+|**400**|Missing/malformed request params.|No Content|
+|**404**|Token not found.|[Error](#error)|
+|**500**|Unexpected error|[Error](#error)|
+
+___
+
+
+<a name="definitions"></a>
+## Definitions
+
+<a name="authrequest"></a>
+### AuthRequest
+
+|Name|Description|Schema|
+|---|---|---|
+|**id_data**  <br>*optional*|Vendor-specific JSON representation of device identity, encrypted with the tenant's public key.<br>In reference implementation, it is a JSON structure with vendor-selected fields, such as MACs, serial numbers, etc.|string|
+|**pubkey**  <br>*optional*|The device's public key, generated by the device or pre-provisioned by the vendor.|string|
+|**status**  <br>*optional*|Request result|enum (pending, accepted, rejected)|
+|**tenant_token**  <br>*optional*|A tenant's unique token (issued by Mender via web GUI/API).|string|
+|**ts**  <br>*optional*|Server-side timestamp of the request.|string|
+
+
+<a name="authrequestnew"></a>
+### AuthRequestNew
+
+|Name|Description|Schema|
+|---|---|---|
+|**id_data**  <br>*required*|Vendor-specific JSON representation of device identity, encrypted with the tenant's public key.<br>In reference implementation, it is a JSON structure with vendor-selected fields, such as MACs, serial numbers, etc.|string|
+|**pubkey**  <br>*required*|The device's public key, generated by the device or pre-provisioned by the vendor.|string|
+|**tenant_token**  <br>*required*|A tenant's unique token (issued by Mender via web GUI/API).|string|
+
+
+<a name="device"></a>
+### Device
+
+|Name|Description|Schema|
+|---|---|---|
+|**created_ts**  <br>*optional*|Created timestamp|string|
+|**id**  <br>*optional*|Mender assigned Device ID.|string|
+|**id_data**  <br>*optional*|Vendor-specific JSON representation of device identity, encrypted with the tenant's public key.<br>In reference implementation, it is a JSON structure with vendor-selected fields, such as MACs, serial numbers, etc.|string|
+|**pubkey**  <br>*optional*|The device's public key, generated by the device or pre-provisioned by the vendor.|string|
+|**status**  <br>*optional*| |[Status](#status)|
+|**tenant_token**  <br>*optional*|A tenant's unique token (issued by Mender via web GUI/API).|string|
+|**updated_ts**  <br>*optional*|Updated timestamp|string|
+
+
+<a name="error"></a>
+### Error
+Error descriptor
+
+
+|Name|Description|Schema|
+|---|---|---|
+|**error**  <br>*optional*|Description of the error|string|
+
+
+<a name="status"></a>
+### Status
+Admission status of the device
+
+
+|Name|Description|Schema|
+|---|---|---|
+|**status**  <br>*required*| |enum (pending, accepted, rejected)|
+
+
+<a name="tokendescriptor"></a>
+### TokenDescriptor
+
+|Name|Description|Schema|
+|---|---|---|
+|**id**  <br>*optional*|Corresponds to the the standard 'jti' claim, contains Used for tracking the token for the purpose of revocation. Unique across the whole system.|string(uuid)|
+|**status**  <br>*optional*|Current status of the token.|enum (active, revoked)|
+|**token**  <br>*optional*|Raw, Base64-encoded JWT token.|string|
+
+
+
