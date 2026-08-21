@@ -13,7 +13,7 @@ For these reasons, the Mender Artifact utility supports several options to custo
 
 The software versioning information is stored in the Mender Artifacts as [*Provides* fields](../../02.Overview/03.Artifact/docs.md#provides-and-depends), and is automatically reported by the Mender Client as inventory data. See below for further details on how to override the default software versioning keys when generating the Artifacts.
 
-![View client reported version information in UI](provides-illustrated.png)
+![View client reported version information in UI](provides-illustrated.png?sizes=587px)
 
 ## Operating System updates
 
@@ -39,7 +39,7 @@ rootfs-image.version=1.0.0
 
 When installing the Artifact, the value above represents a stable version identifier for the "rootfs-image" which is installed on the device, and will only change if a new "rootfs-image" Artifact is installed. Installing other types of Artifacts, such as application updates, will not change it. The Artifact name however, will change every time a new Artifact is installed, and therefore represents the *last installed Artifact*.
 
-![Effect on versions when installing a rootfs-image Artifact](versions-and-installing-rootfs-image-artifact.png)
+![Effect on versions when installing a rootfs-image Artifact](versions-and-installing-rootfs-image-artifact.png?sizes=701px)
 *Effect on versions when installing a rootfs-image Artifact.*
 
 ### Inspect the version
@@ -126,7 +126,7 @@ data-partition.myapp.version=v2020.10
 
 Since we have selected `data-partition` as the filesystem which hosts the software, installing this Artifact will have no effect on the `rootfs-image.version`.
 
-![Effect on versions when installing an application Artifact](versions-and-installing-application-artifact.png)
+![Effect on versions when installing an application Artifact](versions-and-installing-application-artifact.png?sizes=701px)
 *Effect on versions when installing an application Artifact.*
 
 ### Inspect the versions
@@ -150,7 +150,7 @@ In this example, we used the last of the Artifacts produced above, and we can se
 
 The example in the previous section differs from what would happen if we installed the "myapp" application on the root filesystem instead. Since a rootfs-image update overwrites the entire filesystem, any extra applications that have been installed on the filesystem will be erased. See this example:
 
-![Effect on versions when installing a rootfs-image Artifact on the same filesystem as an application](versions-and-installing-same-filesystem-rootfs-image-artifact.png)
+![Effect on versions when installing a rootfs-image Artifact on the same filesystem as an application](versions-and-installing-same-filesystem-rootfs-image-artifact.png?sizes=701px)
 *Effect on versions when installing a rootfs-image Artifact on the same filesystem as an application.*
 
 As you can see, Mender has erased the version information for "myapp", since it was on the old root filesystem, which has now been overwritten.
